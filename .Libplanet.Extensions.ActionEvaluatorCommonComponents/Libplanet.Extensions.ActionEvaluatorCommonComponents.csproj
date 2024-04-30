@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\.Libplanet\Libplanet\Libplanet.csproj" />
+    <ProjectReference Include="$(LibplanetSolutionPath)Libplanet\Libplanet.csproj" />
   </ItemGroup>
 
 </Project>
