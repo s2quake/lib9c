@@ -5,13 +5,13 @@ using Libplanet.Crypto;
 
 namespace Nekoyume.Action.DPoS.Model
 {
-    public class Evidence
+    public class Equivocation
     {
-        public Evidence()
+        public Equivocation()
         {
         }
 
-        public Evidence(IValue serialized)
+        public Equivocation(IValue serialized)
         {
             var dict = (Bencodex.Types.Dictionary)serialized;
             Height = dict["height"].ToLong();
@@ -27,7 +27,7 @@ namespace Nekoyume.Action.DPoS.Model
 
         public static Address DeriveAddress(Address validatorAddress)
         {
-            return validatorAddress.Derive(nameof(Evidence));
+            return validatorAddress.Derive(nameof(Equivocation));
         }
 
         public IValue Serialize()

@@ -5,10 +5,9 @@ using Nekoyume.Action.DPoS.Misc;
 using Nekoyume.Action.DPoS.Model;
 using Libplanet.Action;
 using Libplanet.Action.State;
-using Nekoyume.Module;
 using Libplanet.Types.Consensus;
 using Libplanet.Crypto;
-using Nekoyume.Action.DPoS.Util;
+using System.Linq;
 
 namespace Nekoyume.Action.DPoS
 {
@@ -37,39 +36,16 @@ namespace Nekoyume.Action.DPoS
         public IWorld Execute(IActionContext context)
         {
             var states = context.PreviousState;
-            var votes = context.LastCommit?.Votes ?? ImmutableArray.Create<Vote>();
-            var nativeTokens = ImmutableHashSet.Create(
-                Asset.GovernanceToken, Asset.ConsensusToken, Asset.Share);
-
             var validatorSet = states.GetValidatorSet();
-            foreach (var vote in votes)
+            var evidences = context.Evidences;
+
+            foreach (var evidence in evidences)
             {
-                var operatorAddress = GetOperatorAddress(validatorSet, vote.ValidatorPublicKey);
-                var validatorAddress = Model.Validator.DeriveAddress(operatorAddress);
-
-                var noVoteAddress = validatorAddress.Derive("no-vote");
-                if (states.GetDPoSState(noVoteAddress) is Integer integer)
-                {
-                    SlashCtrl.Execute(
-                        world: states,
-                        actionContext: context,
-                        operatorAddress: operatorAddress,
-                        power: integer.Value,
-                        signed: true,
-                        nativeTokens: nativeTokens);
-                    states.RemoveDPoSState(noVoteAddress);
-                }
-
-                if (ValidatorCtrl.GetValidator(states, validatorAddress) is { } &&
-                    EvidenceCtrl.GetEvidence(states, validatorAddress) is { } evidence)
-                {
-                    states = EvidenceCtrl.Execute(
-                        world: states,
-                        actionContext: context,
-                        validatorAddress: validatorAddress,
-                        evidence: evidence,
-                        nativeTokens: nativeTokens);
-                }
+                states = SlashByEvidence(
+                    world: states,
+                    actionContext: context,
+                    validatorSet: validatorSet,
+                    evidence: evidence);
             }
 
             return states;
@@ -82,6 +58,38 @@ namespace Nekoyume.Action.DPoS
             var validatorIndex = validatorSet.FindIndex(publicKey);
             var validator = validatorSet[validatorIndex];
             return validator.OperatorAddress;
+        }
+
+        private static IWorld SlashByEvidence(
+            IWorld world,
+            IActionContext actionContext,
+            Libplanet.Types.Consensus.ValidatorSet validatorSet,
+            Evidence evidence)
+        {
+            var targetAddress = evidence.TargetAddress;
+            var validators = validatorSet.Validators;
+
+            if (validators.FirstOrDefault(item => item.PublicKey.Address == targetAddress) is
+                Libplanet.Types.Consensus.Validator validator)
+            {
+                var nativeTokens = ImmutableHashSet.Create(
+                    Asset.GovernanceToken, Asset.ConsensusToken, Asset.Share);
+                var operatorAddress = GetOperatorAddress(validatorSet, validator.PublicKey);
+                var validatorAddress = Model.Validator.DeriveAddress(operatorAddress);
+                world = EvidenceCtrl.Execute(
+                    world: world,
+                    actionContext: actionContext,
+                    validatorAddress: validatorAddress,
+                    evidence: new Equivocation
+                    {
+                        Height = evidence.Height,
+                        Power = validator.Power,
+                        Address = targetAddress,
+                    },
+                    nativeTokens: nativeTokens);
+            }
+
+            return world;
         }
     }
 }

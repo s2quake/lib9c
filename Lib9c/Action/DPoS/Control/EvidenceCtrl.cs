@@ -11,27 +11,27 @@ namespace Nekoyume.Action.DPoS.Control
 {
     internal static class EvidenceCtrl
     {
-        internal static Evidence? GetEvidence(IWorldState states, Address validatorAddress)
+        internal static Equivocation? GetEvidence(IWorldState states, Address validatorAddress)
         {
-            var address = Evidence.DeriveAddress(validatorAddress);
+            var address = Equivocation.DeriveAddress(validatorAddress);
             if (states.GetDPoSState(address) is { } value)
             {
-                return new Evidence(value);
+                return new Equivocation(value);
             }
 
             return null;
         }
 
-        internal static IWorld SetEvidence(IWorld world, Evidence evidence)
+        internal static IWorld SetEvidence(IWorld world, Equivocation evidence)
         {
-            var address = Evidence.DeriveAddress(evidence.Address);
+            var address = Equivocation.DeriveAddress(evidence.Address);
             var value = evidence.Serialize();
             return world.SetDPoSState(address, value);
         }
 
-        internal static IWorld Remove(IWorld world, Evidence evidence)
+        internal static IWorld Remove(IWorld world, Equivocation evidence)
         {
-            var address = Evidence.DeriveAddress(evidence.Address);
+            var address = Equivocation.DeriveAddress(evidence.Address);
             return world.RemoveDPoSState(address);
         }
 
@@ -39,7 +39,7 @@ namespace Nekoyume.Action.DPoS.Control
             IWorld world,
             IActionContext actionContext,
             Address validatorAddress,
-            Evidence evidence,
+            Equivocation evidence,
             IImmutableSet<Currency> nativeTokens)
         {
             if (!(ValidatorCtrl.GetValidator(world, validatorAddress) is { } validator))
