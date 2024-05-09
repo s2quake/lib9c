@@ -5,6 +5,7 @@ using Nekoyume.Action.DPoS.Misc;
 using Nekoyume.Action.DPoS.Model;
 using Libplanet.Action;
 using Libplanet.Action.State;
+using Libplanet.Types.Evidences;
 using Libplanet.Types.Consensus;
 using Libplanet.Crypto;
 using System.Linq;
