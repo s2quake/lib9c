@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\.Libplanet\Libplanet\Libplanet.csproj" />
-    <ProjectReference Include="..\.Libplanet\Libplanet.Types\Libplanet.Types.csproj" />
+    <ProjectReference Include="$(LibplanetSolutionPath)Libplanet\Libplanet.csproj" />
+    <ProjectReference Include="$(LibplanetSolutionPath)Libplanet.Types\Libplanet.Types.csproj" />
   </ItemGroup>
 
   <ItemGroup>
