@@ -21,7 +21,7 @@ namespace Nekoyume.Action.DPoS.Sys
         {
         }
 
-       /// <inheritdoc cref="IAction.PlainValue"/>
+        /// <inheritdoc cref="IAction.PlainValue"/>
         public override IValue PlainValue => new Bencodex.Types.Boolean(true);
 
         /// <inheritdoc cref="IAction.LoadPlainValue(IValue)"/>
@@ -36,14 +36,17 @@ namespace Nekoyume.Action.DPoS.Sys
             var states = context.PreviousState;
             var nativeTokens = ImmutableHashSet.Create(
                 Asset.GovernanceToken, Asset.ConsensusToken, Asset.Share);
-            var previousProposerInfo =
+            if (states.GetDPoSState(ReservedAddress.ProposerInfo) is not null)
+            {
+                var previousProposerInfo =
                 new ProposerInfo(states.GetDPoSState(ReservedAddress.ProposerInfo));
-            states = AllocateRewardCtrl.Execute(
-                states,
-                context,
-                nativeTokens,
-                context.LastCommit?.Votes,
-                previousProposerInfo);
+                states = AllocateRewardCtrl.Execute(
+                    states,
+                    context,
+                    nativeTokens,
+                    context.LastCommit?.Votes,
+                    previousProposerInfo);
+            }
 
             return states;
         }
