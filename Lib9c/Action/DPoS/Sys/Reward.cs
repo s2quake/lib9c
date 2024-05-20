@@ -1,8 +1,10 @@
 ﻿using Bencodex.Types;
 using Libplanet.Action;
 using Libplanet.Action.State;
+using Libplanet.Types.Assets;
 using Nekoyume.Action.DPoS.Misc;
 using Nekoyume.Module;
+using Serilog;
 
 namespace Nekoyume.Action.DPoS.Sys
 {
@@ -42,10 +44,15 @@ namespace Nekoyume.Action.DPoS.Sys
                 return world;
             }
 
+            var reward = realGasPrice * context.GasUsed();
+            Log.Debug(
+                "[Reward #{index}] Minting mead reward to reward pool: {Reward}",
+                context.BlockIndex,
+                reward);
             return world.MintAsset(
                 context,
                 ReservedAddress.RewardPool,
-                realGasPrice * context.GasUsed());
+                reward);
         }
     }
 }

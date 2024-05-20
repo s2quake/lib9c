@@ -13,7 +13,7 @@ namespace Nekoyume.Action.DPoS.Model
 
         public ValidatorRewards(Address validatorAddress, Currency currency)
         {
-            Address = DeriveAddress(validatorAddress, currency);
+            Address = DeriveAddress(validatorAddress);
             ValidatorAddress = validatorAddress;
             Currency = currency;
             _rewards = new SortedList<long, FungibleAssetValue>();
@@ -51,9 +51,9 @@ namespace Nekoyume.Action.DPoS.Model
         public ImmutableSortedDictionary<long, FungibleAssetValue> Rewards
             => _rewards.ToImmutableSortedDictionary();
 
-        public static Address DeriveAddress(Address validatorAddress, Currency currency)
+        public static Address DeriveAddress(Address validatorAddress)
         {
-            return AddressHelper.Derive(AddressHelper.Derive(validatorAddress, "ValidatorRewardsAddress"), currency.Ticker);
+            return AddressHelper.Derive(validatorAddress, "ValidatorRewardsAddress");
         }
 
         public void Add(long blockHeight, FungibleAssetValue reward)

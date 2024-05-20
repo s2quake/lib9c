@@ -27,8 +27,7 @@ namespace Nekoyume.Action.DPoS.Control
             Address validatorAddress,
             Currency currency)
         {
-            Address validatorRewardsAddress
-                = ValidatorRewards.DeriveAddress(validatorAddress, currency);
+            Address validatorRewardsAddress = ValidatorRewards.DeriveAddress(validatorAddress);
             ValidatorRewards validatorRewards;
             if (states.GetDPoSState(validatorRewardsAddress) is { } value)
             {

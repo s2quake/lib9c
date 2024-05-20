@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Numerics;
+using Lib9c;
 using Libplanet.Action;
 using Libplanet.Action.State;
 using Libplanet.Blockchain;
 using Libplanet.Crypto;
 using Libplanet.Store;
+using Libplanet.Store.Trie;
 using Libplanet.Types.Assets;
 using Libplanet.Types.Blocks;
 using Libplanet.Types.Tx;
@@ -27,19 +30,26 @@ public class DPoSBlockHelper
     {
         privateKey ??= new PrivateKey();
         var trie = stateStore.GetStateRoot(null);
+        trie = trie.SetMetadata(new TrieMetadata(BlockMetadata.CurrentProtocolVersion));
         IWorld world = new World(new WorldBaseState(trie, stateStore));
         foreach (var pair in initialNCGs)
         {
-            var actionContext = new ActionContext
-            {
-                PreviousState = world,
-                Signer = privateKey.Address,
-            };
-            var amount = new FungibleAssetValue(
-                Asset.GovernanceToken,
-                pair.Value,
-                BigInteger.Zero);
-            world = world.MintAsset(actionContext, pair.Key, amount);
+            world = world.MintAsset(
+                new ActionContext
+                {
+                    PreviousState = world,
+                    Signer = privateKey.Address,
+                },
+                pair.Key,
+                Asset.GovernanceToken * pair.Value);
+            world = world.MintAsset(
+                new ActionContext
+                {
+                    PreviousState = world,
+                    Signer = privateKey.Address,
+                },
+                pair.Key,
+                Currencies.Mead * 10000);
         }
 
         foreach (var pair in initialValidators)
@@ -49,11 +59,8 @@ public class DPoSBlockHelper
                 PreviousState = world,
                 Signer = pair.Key.Address,
             };
-            var amount = new FungibleAssetValue(
-                Asset.GovernanceToken,
-                pair.Value,
-                BigInteger.Zero);
-            world = new PromoteValidator(pair.Key, amount).Execute(actionContext);
+            world = new PromoteValidator(pair.Key, Asset.GovernanceToken * pair.Value)
+                .Execute(actionContext);
         }
 
         world = new UpdateValidators().Execute(
@@ -62,6 +69,7 @@ public class DPoSBlockHelper
                 PreviousState = world,
                 Signer = privateKey.Address
             });
+        world = ActionEvaluator.CommitWorld(world, stateStore);
         trie = stateStore.Commit(world.Trie);
 
         return
@@ -80,7 +88,7 @@ public class DPoSBlockHelper
 
         public Address Miner { get; set; }
 
-        public int BlockProtocolVersion { get; set; }
+        public int BlockProtocolVersion => BlockMetadata.CurrentProtocolVersion;
 
         public BlockCommit? LastCommit => null;
 
@@ -98,7 +106,6 @@ public class DPoSBlockHelper
 
         public void UseGas(long gas)
         {
-            throw new NotImplementedException();
         }
 
         public IRandom GetRandom()

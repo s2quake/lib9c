@@ -148,7 +148,7 @@ namespace Nekoyume.Action.DPoS.Control
                 if (reward.Sign > 0)
                 {
                     Address validatorRewardAddress
-                        = ValidatorRewards.DeriveAddress(delegation.ValidatorAddress, nativeToken);
+                        = ValidatorRewards.DeriveAddress(delegation.ValidatorAddress);
 
                     states = states.TransferAsset(
                         ctx,

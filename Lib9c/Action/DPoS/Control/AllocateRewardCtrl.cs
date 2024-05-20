@@ -14,6 +14,7 @@ using Nekoyume.Action.DPoS.Misc;
 using Nekoyume.Action.DPoS.Model;
 using Nekoyume.Action.DPoS.Util;
 using Nekoyume.Module;
+using Serilog;
 using Validator = Nekoyume.Action.DPoS.Model.Validator;
 using ValidatorSet = Nekoyume.Action.DPoS.Model.ValidatorSet;
 
@@ -46,6 +47,10 @@ namespace Nekoyume.Action.DPoS.Control
                 throw new NullNativeTokensException();
             }
 
+            Log.Debug(
+                "[AllocateReward #{Index}] Proposer: {Proposer}",
+                ctx.BlockIndex,
+                proposerInfo.Proposer);
             foreach (Currency nativeToken in nativeTokens)
             {
                 if (votes is { } lastVotesEnumerable)
@@ -61,6 +66,10 @@ namespace Nekoyume.Action.DPoS.Control
 
                 FungibleAssetValue communityFund = states.GetBalance(
                     ReservedAddress.RewardPool, nativeToken);
+                Log.Debug(
+                    "[AllocateReward #{Index}] CommunityFund: {CommunityFund}",
+                    ctx.BlockIndex,
+                    communityFund);
 
                 if (communityFund.Sign > 0)
                 {
@@ -84,6 +93,10 @@ namespace Nekoyume.Action.DPoS.Control
         {
             FungibleAssetValue blockReward = states.GetBalance(
                 ReservedAddress.RewardPool, nativeToken);
+            Log.Debug(
+                "[AllocateReward #{Index}] BlockReward: {BlockReward}",
+                ctx.BlockIndex,
+                blockReward);
 
             if (proposerInfo.BlockIndex != ctx.BlockIndex - 1)
             {
@@ -114,6 +127,11 @@ namespace Nekoyume.Action.DPoS.Control
                 .DivRem(votePowerDenominator * BonusProposerRewardDenominator);
             FungibleAssetValue proposerReward = baseProposerReward + bonusProposerReward;
 
+            Log.Debug(
+                "[AllocateReward #{Index}] ProposerReward for proposer {Proposer}: {ProposerReward}",
+                ctx.BlockIndex,
+                proposerInfo.Proposer,
+                proposerReward);
             states = states.TransferAsset(
                 ctx,
                 ReservedAddress.RewardPool,
@@ -171,7 +189,7 @@ namespace Nekoyume.Action.DPoS.Control
                 states = states.TransferAsset(
                     ctx,
                     ReservedAddress.RewardPool,
-                    ValidatorRewards.DeriveAddress(vote.ValidatorPublicKey.Address, nativeToken),
+                    ValidatorRewards.DeriveAddress(vote.ValidatorPublicKey.Address),
                     delegationRewardSum);
 
                 states = ValidatorRewardsCtrl.Add(
