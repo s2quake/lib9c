@@ -8,6 +8,7 @@ namespace Lib9c.Tests.Action
     using Libplanet.Common;
     using Libplanet.Crypto;
     using Libplanet.Types.Blocks;
+    using Libplanet.Types.Evidences;
     using Libplanet.Types.Tx;
 
     public class ActionContext : IActionContext
@@ -45,6 +46,8 @@ namespace Lib9c.Tests.Action
             get => _txs ?? ImmutableList<ITransaction>.Empty;
             set => _txs = value;
         }
+
+        public IReadOnlyList<Evidence> Evidences => ImmutableList<Evidence>.Empty;
 
         public void UseGas(long gas)
         {

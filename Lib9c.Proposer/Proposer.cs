@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Numerics;
 using System.Threading;
 using Libplanet.Action;
 using Libplanet.Blockchain;
@@ -45,6 +46,7 @@ namespace Nekoyume.Blockchain
                                 block.Hash,
                                 DateTimeOffset.UtcNow,
                                 _privateKey.PublicKey,
+                                BigInteger.One,
                                 VoteFlag.PreCommit).Sign(_privateKey)))
                     : null;
                 _chain.Append(block, commit);
