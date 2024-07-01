@@ -1,0 +1,7 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <LibplanetDirectory Condition="'$(LibplanetDirectory)' == ''">$(MSBuildThisFileDirectory)..\libplanet\</LibplanetDirectory>
+  </PropertyGroup>
+
+</Project>
