@@ -24,7 +24,7 @@ namespace Nekoyume.Action.DPoS.Sys
         {
         }
 
-       /// <inheritdoc cref="IAction.PlainValue"/>
+        /// <inheritdoc cref="IAction.PlainValue"/>
         public override IValue PlainValue => new Bencodex.Types.Boolean(true);
 
         /// <inheritdoc cref="IAction.LoadPlainValue(IValue)"/>
@@ -37,10 +37,10 @@ namespace Nekoyume.Action.DPoS.Sys
         public override IWorld Execute(IActionContext context)
         {
             var states = context.PreviousState;
-            var nativeTokens = states.GetNativeTokens();
 
             if (states.GetDPoSState(ReservedAddress.ProposerInfo) is { } proposerInfoState)
             {
+                var nativeTokens = states.GetNativeTokens();
                 states = AllocateRewardCtrl.Execute(
                     states,
                     context,
