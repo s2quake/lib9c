@@ -55,6 +55,30 @@ namespace Nekoyume
         public static readonly Address ExploreBoard          = new Address("0000000000000000000000000000000000000102");
         public static readonly Address ExplorerList          = new Address("0000000000000000000000000000000000000103");
 
+        #region Guild
+
+        /// <summary>
+        /// An address of an account having <see cref="Nekoyume.Model.Guild.Guild"/>.
+        /// </summary>
+        public static readonly Address Guild                 = new Address("0000000000000000000000000000000000000200");
+
+        /// <summary>
+        /// An address of an account having <see cref="Nekoyume.Model.Guild.GuildParticipant"/>
+        /// </summary>
+        public static readonly Address GuildParticipant     = new Address("0000000000000000000000000000000000000201");
+
+        /// <summary>
+        /// Build an <see cref="Address"/> of an <see cref="Libplanet.Action.State.Account"/>,
+        /// represented as `agentAddress` ↔ <see cref="Bencodex.Types.Boolean"/>, indicates whether
+        /// the `agentAddress` is banned.
+        /// </summary>
+        /// <param name="guildAddress">The guild address.</param>
+        /// <returns>An account address.</returns>
+        public static Address GetGuildBanAccountAddress(Address guildAddress) =>
+            guildAddress.Derive("banned");
+
+        #endregion
+
         public static Address GetSheetAddress<T>() where T : ISheet => GetSheetAddress(typeof(T).Name);
 
         public static Address GetSheetAddress(string sheetName) => TableSheet.Derive(sheetName);
