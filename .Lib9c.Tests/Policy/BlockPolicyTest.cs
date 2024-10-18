@@ -28,20 +28,16 @@ namespace Lib9c.Tests
     using Nekoyume.Blockchain.Policy;
     using Nekoyume.Model;
     using Nekoyume.Model.State;
+    using Nekoyume.ValidatorDelegation;
     using Xunit;
 
     public class BlockPolicyTest
     {
         private readonly PrivateKey _privateKey;
-        private readonly Currency _currency;
 
         public BlockPolicyTest()
         {
             _privateKey = new PrivateKey();
-#pragma warning disable CS0618
-            // Use of obsolete method Currency.Legacy(): https://github.com/planetarium/lib9c/discussions/1319
-            _currency = Currency.Legacy("NCG", 2, _privateKey.Address);
-#pragma warning restore CS0618
         }
 
         [Fact]
@@ -70,7 +66,8 @@ namespace Lib9c.Tests
                  },
             };
             Block genesis = MakeGenesisBlock(
-                new ValidatorSet(new List<Validator> { new (adminPrivateKey.PublicKey, 1000) }),
+                new ValidatorSet(
+                    new List<Validator> { new (adminPrivateKey.PublicKey, 10_000_000_000_000_000_000) }),
                 adminAddress,
                 ImmutableHashSet<Address>.Empty,
                 actionBases: new[] { mint, mint2 },
@@ -167,7 +164,8 @@ namespace Lib9c.Tests
             IBlockPolicy policy = blockPolicySource.GetPolicy(null, null, null, null);
             IStagePolicy stagePolicy = new VolatileStagePolicy();
             Block genesis = MakeGenesisBlock(
-                new ValidatorSet(new List<Validator> { new (adminPrivateKey.PublicKey, 1000) }),
+                new ValidatorSet(
+                    new List<Validator> { new (adminPrivateKey.PublicKey, 10_000_000_000_000_000_000) }),
                 adminAddress,
                 ImmutableHashSet.Create(adminAddress)
             );
@@ -233,7 +231,8 @@ namespace Lib9c.Tests
                 maxTransactionsPerSignerPerBlockPolicy: null);
             IStagePolicy stagePolicy = new VolatileStagePolicy();
             Block genesis = MakeGenesisBlock(
-                new ValidatorSet(new List<Validator> { new (adminPrivateKey.PublicKey, 1000) }),
+                new ValidatorSet(
+                    new List<Validator> { new (adminPrivateKey.PublicKey, 10_000_000_000_000_000_000) }),
                 adminAddress,
                 ImmutableHashSet.Create(adminAddress),
                 new AuthorizedMinersState(
@@ -286,7 +285,8 @@ namespace Lib9c.Tests
                 maxTransactionsPerSignerPerBlockPolicy: null);
             IStagePolicy stagePolicy = new VolatileStagePolicy();
             Block genesis = MakeGenesisBlock(
-                new ValidatorSet(new List<Validator> { new (adminPrivateKey.PublicKey, 1000) }),
+                new ValidatorSet(
+                    new List<Validator> { new (adminPrivateKey.PublicKey, 10_000_000_000_000_000_000) }),
                 adminAddress,
                 ImmutableHashSet.Create(adminAddress),
                 new AuthorizedMinersState(
@@ -350,10 +350,11 @@ namespace Lib9c.Tests
             // Total 0.5 + 0.95 = 1.45
             blockChain.Append(block, commit);
 
+            var rewardCurrency = ValidatorDelegatee.ValidatorRewardCurrency;
             var actualBalance = blockChain
                 .GetNextWorldState()
-                .GetBalance(adminAddress, _currency);
-            var expectedBalance = new FungibleAssetValue(_currency, 1, 45);
+                .GetBalance(adminAddress, rewardCurrency);
+            var expectedBalance = new FungibleAssetValue(rewardCurrency, 1, 450000000000000000);
             Assert.Equal(expectedBalance, actualBalance);
 
             blockChain.MakeTransaction(
@@ -372,8 +373,8 @@ namespace Lib9c.Tests
 
             actualBalance = blockChain
                 .GetNextWorldState()
-                .GetBalance(adminAddress, _currency);
-            expectedBalance = new FungibleAssetValue(_currency, 20, 0);
+                .GetBalance(adminAddress, rewardCurrency);
+            expectedBalance = new FungibleAssetValue(rewardCurrency, 20, 0);
             Assert.Equal(expectedBalance, actualBalance);
         }
 
@@ -393,7 +394,8 @@ namespace Lib9c.Tests
             IStagePolicy stagePolicy = new VolatileStagePolicy();
             Block genesis =
                 MakeGenesisBlock(
-                    validators: new ValidatorSet(new List<Validator> { new (adminPublicKey, 1000) }),
+                    validators: new ValidatorSet(
+                        new List<Validator> { new (adminPublicKey, 10_000_000_000_000_000_000) }),
                     adminPublicKey.Address,
                     ImmutableHashSet<Address>.Empty);
 
@@ -525,7 +527,8 @@ namespace Lib9c.Tests
                     .Default
                     .Add(new SpannedSubPolicy<int>(2, null, null, 5)));
             IStagePolicy stagePolicy = new VolatileStagePolicy();
-            var validatorSet = new ValidatorSet(new List<Validator> { new (adminPrivateKey.PublicKey, 1000) });
+            var validatorSet = new ValidatorSet(
+                new List<Validator> { new (adminPrivateKey.PublicKey, 10_000_000_000_000_000_000) });
             Block genesis =
                 MakeGenesisBlock(
                     validatorSet,
