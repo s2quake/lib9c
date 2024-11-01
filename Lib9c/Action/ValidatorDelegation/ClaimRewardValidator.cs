@@ -52,7 +52,7 @@ namespace Nekoyume.Action.ValidatorDelegation
             var guildValidatorRepository = new GuildValidatorRepository(world, context);
             var guildValidatorDelegator = guildValidatorRepository.GetGuildValidatorDelegator(context.Signer);
             var guildValidatorDelegatee = guildValidatorRepository.GetGuildValidatorDelegatee(guild.ValidatorAddress);
-            guildValidatorDelegator.ClaimReward(guildValidatorDelegatee, context.BlockIndex);
+            guildValidatorDelegator.ClaimReward(guildValidatorDelegatee);
 
             return guildValidatorRepository.World;
         }

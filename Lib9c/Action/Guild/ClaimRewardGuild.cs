@@ -46,7 +46,7 @@ namespace Nekoyume.Action.ValidatorDelegation
 
             var guild = guildRepository.GetGuild(guildAddress);
 
-            guildParticipant.ClaimReward(guild, context.BlockIndex);
+            guildParticipant.ClaimReward(guild);
 
             return guildRepository.World;
         }

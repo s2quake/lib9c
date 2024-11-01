@@ -44,7 +44,7 @@ namespace Nekoyume.Action.ValidatorDelegation
             foreach (var abstain in abstainsToSlash)
             {
                 var validatorDelegatee = repository.GetValidatorDelegatee(abstain.Address);
-                validatorDelegatee.Slash(LivenessSlashFactor, context.BlockIndex, context.BlockIndex);
+                validatorDelegatee.Slash(LivenessSlashFactor, context.BlockIndex);
                 validatorDelegatee.Jail(context.BlockIndex + AbstainJailTime);
             }
 
@@ -59,7 +59,7 @@ namespace Nekoyume.Action.ValidatorDelegation
                         }
 
                         var validatorDelegatee = repository.GetValidatorDelegatee(e.TargetAddress);
-                        validatorDelegatee.Slash(DuplicateVoteSlashFactor, e.Height, context.BlockIndex);
+                        validatorDelegatee.Slash(DuplicateVoteSlashFactor, e.Height);
                         validatorDelegatee.Tombstone();
                         break;
                     default:

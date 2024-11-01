@@ -45,19 +45,19 @@ namespace Nekoyume.Delegation
 
         FungibleAssetValue FAVFromShare(BigInteger share);
 
-        BigInteger Bond(Address delegatorAddress, FungibleAssetValue fav, long height);
+        BigInteger Bond(Address delegatorAddress, FungibleAssetValue fav);
 
-        FungibleAssetValue Unbond(Address delegatorAddress, BigInteger share, long height);
+        FungibleAssetValue Unbond(Address delegatorAddress, BigInteger share);
 
-        void DistributeReward(Address delegatorAddress, long height);
+        void DistributeReward(Address delegatorAddress);
 
-        void CollectRewards(long height);
+        void CollectRewards();
 
-        void Slash(BigInteger slashFactor, long infractionHeight, long height);
+        void Slash(BigInteger slashFactor, long infractionHeight);
 
         void Jail(long releaseHeight);
 
-        void Unjail(long height);
+        void Unjail();
 
         void Tombstone();
 

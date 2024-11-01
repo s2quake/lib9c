@@ -167,8 +167,7 @@ namespace Nekoyume.Action.ValidatorDelegation
                     rewardToAllocate,
                     validatorPower,
                     validatorSetPower,
-                    Addresses.RewardPool,
-                    blockHeight);
+                    Addresses.RewardPool);
             }
         }
     }

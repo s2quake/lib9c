@@ -39,7 +39,7 @@ namespace Nekoyume.Action.ValidatorDelegation
             var repository = new ValidatorRepository(world, context);
             var validatorDelegatee = repository.GetValidatorDelegatee(context.Signer);
             var validatorDelegator = repository.GetValidatorDelegator(context.Signer, context.Signer);
-            validatorDelegator.ClaimReward(validatorDelegatee, context.BlockIndex);
+            validatorDelegator.ClaimReward(validatorDelegatee);
 
             return repository.World;
         }

@@ -27,7 +27,7 @@ namespace Nekoyume.Module.ValidatorDelegation
             var validatorDelegator = repository.GetValidatorDelegator(
                 delegatorAddress, rewardAddress);
             var validatorDelegatee = repository.GetValidatorDelegatee(validatorAddress);
-            validatorDelegator.Delegate(validatorDelegatee, fav, context.BlockIndex);
+            validatorDelegator.Delegate(validatorDelegatee, fav);
 
             return repository;
         }
@@ -49,7 +49,7 @@ namespace Nekoyume.Module.ValidatorDelegation
             var validatorDelegator = repository.GetValidatorDelegator(
                 delegatorAddress, rewardAddress);
             var validatorDelegatee = repository.GetValidatorDelegatee(validatorAddress);
-            validatorDelegator.Undelegate(validatorDelegatee, share, context.BlockIndex);
+            validatorDelegator.Undelegate(validatorDelegatee, share);
 
             return repository;
         }
@@ -74,7 +74,7 @@ namespace Nekoyume.Module.ValidatorDelegation
                 delegatorAddress, rewardAddress);
             var srcValidatorDelegatee = repository.GetValidatorDelegatee(srcValidatorAddress);
             var dstValidatorDelegatee = repository.GetValidatorDelegatee(dstValidatorAddress);
-            validatorDelegator.Redelegate(srcValidatorDelegatee, dstValidatorDelegatee, share, context.BlockIndex);
+            validatorDelegator.Redelegate(srcValidatorDelegatee, dstValidatorDelegatee, share);
 
             return repository;
         }
@@ -95,7 +95,7 @@ namespace Nekoyume.Module.ValidatorDelegation
                 delegatorAddress, rewardAddress);
             var validatorDelegatee = repository.GetValidatorDelegatee(address);
 
-            validatorDelegator.ClaimReward(validatorDelegatee, context.BlockIndex);
+            validatorDelegator.ClaimReward(validatorDelegatee);
 
             return repository;
         }

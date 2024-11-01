@@ -112,14 +112,14 @@ namespace Nekoyume.Delegation
         public FungibleAssetValue FAVFromShare(BigInteger share)
             => Metadata.FAVFromShare(share);
 
-        public BigInteger Bond(IDelegator delegator, FungibleAssetValue fav, long height)
-            => Bond((TDelegator)delegator, fav, height);
+        public BigInteger Bond(IDelegator delegator, FungibleAssetValue fav)
+            => Bond((TDelegator)delegator, fav);
 
-        public FungibleAssetValue Unbond(IDelegator delegator, BigInteger share, long height)
-            => Unbond((TDelegator)delegator, share, height);
+        public FungibleAssetValue Unbond(IDelegator delegator, BigInteger share)
+            => Unbond((TDelegator)delegator, share);
 
-        public void DistributeReward(IDelegator delegator, long height)
-            => DistributeReward((TDelegator)delegator, height);
+        public void DistributeReward(IDelegator delegator)
+            => DistributeReward((TDelegator)delegator);
 
         public void Jail(long releaseHeight)
         {
@@ -129,8 +129,9 @@ namespace Nekoyume.Delegation
             OnEnjailed(EventArgs.Empty);
         }
 
-        public void Unjail(long height)
+        public void Unjail()
         {
+            var height = Repository.ActionContext.BlockIndex;
             if (!Jailed)
             {
                 throw new InvalidOperationException("Cannot unjail non-jailed delegatee.");
@@ -174,9 +175,9 @@ namespace Nekoyume.Delegation
         public Address LumpSumRewardsRecordAddress(long height)
             => Metadata.LumpSumRewardsRecordAddress(height);
 
-        public virtual BigInteger Bond(TDelegator delegator, FungibleAssetValue fav, long height)
+        public virtual BigInteger Bond(TDelegator delegator, FungibleAssetValue fav)
         {
-            DistributeReward(delegator, height);
+            DistributeReward(delegator);
 
             if (!fav.Currency.Equals(DelegationCurrency))
             {
@@ -197,16 +198,16 @@ namespace Nekoyume.Delegation
             Metadata.AddShare(share);
             Metadata.AddDelegatedFAV(fav);
             Repository.SetBond(bond);
-            StartNewRewardPeriod(height);
+            StartNewRewardPeriod();
             Repository.SetDelegateeMetadata(Metadata);
-            OnDelegationChanged(new DelegationChangedEventArgs(height));
+            OnDelegationChanged(new DelegationChangedEventArgs(Repository.ActionContext.BlockIndex));
 
             return share;
         }
 
-        public FungibleAssetValue Unbond(TDelegator delegator, BigInteger share, long height)
+        public FungibleAssetValue Unbond(TDelegator delegator, BigInteger share)
         {
-            DistributeReward(delegator, height);
+            DistributeReward(delegator);
             if (TotalShares.IsZero || TotalDelegated.RawValue.IsZero)
             {
                 throw new InvalidOperationException(
@@ -225,15 +226,16 @@ namespace Nekoyume.Delegation
             Metadata.RemoveShare(share);
             Metadata.RemoveDelegatedFAV(fav);
             Repository.SetBond(bond);
-            StartNewRewardPeriod(height);
+            StartNewRewardPeriod();
             Repository.SetDelegateeMetadata(Metadata);
-            OnDelegationChanged(new DelegationChangedEventArgs(height));
+            OnDelegationChanged(new DelegationChangedEventArgs(Repository.ActionContext.BlockIndex));
 
             return fav;
         }
 
-        public void DistributeReward(TDelegator delegator, long height)
+        public void DistributeReward(TDelegator delegator)
         {
+            var height = Repository!.ActionContext.BlockIndex;
             Bond bond = Repository.GetBond((TDelegatee)this, delegator.Address);
             BigInteger share = bond.Share;
 
@@ -298,8 +300,9 @@ namespace Nekoyume.Delegation
             Repository.SetBond(bond);
         }
 
-        public void CollectRewards(long height)
+        public void CollectRewards()
         {
+            var height = Repository.ActionContext.BlockIndex;
             FungibleAssetValue rewards = Repository.GetBalance(RewardPoolAddress, RewardCurrency);
             LumpSumRewardsRecord record = Repository.GetCurrentLumpSumRewardsRecord((TDelegatee)this)
                 ?? new LumpSumRewardsRecord(
@@ -318,8 +321,9 @@ namespace Nekoyume.Delegation
             Repository.SetLumpSumRewardsRecord(record);
         }
 
-        public void Slash(BigInteger slashFactor, long infractionHeight, long height)
+        public void Slash(BigInteger slashFactor, long infractionHeight)
         {
+            var height = Repository.ActionContext.BlockIndex;
             FungibleAssetValue slashed = TotalDelegated.DivRem(slashFactor, out var rem);
             if (rem.Sign > 0)
             {
@@ -337,7 +341,7 @@ namespace Nekoyume.Delegation
             {
                 var unbonding = UnbondingFactory.GetUnbondingFromRef(item, Repository);
 
-                unbonding = unbonding.Slash(slashFactor, infractionHeight, height, out var slashedFAV);
+                unbonding = unbonding.Slash(slashFactor, infractionHeight, out var slashedFAV);
 
                 if (slashedFAV.HasValue)
                 {
@@ -367,17 +371,17 @@ namespace Nekoyume.Delegation
             OnDelegationChanged(new DelegationChangedEventArgs(height));
         }
 
-        BigInteger IDelegatee.Bond(Address delegatorAddress, FungibleAssetValue fav, long height)
-            => Bond(Repository.GetDelegator(delegatorAddress), fav, height);
+        BigInteger IDelegatee.Bond(Address delegatorAddress, FungibleAssetValue fav)
+            => Bond(Repository.GetDelegator(delegatorAddress), fav);
 
-        FungibleAssetValue IDelegatee.Unbond(Address delegatorAddress, BigInteger share, long height)
-            => Unbond(Repository.GetDelegator(delegatorAddress), share, height);
+        FungibleAssetValue IDelegatee.Unbond(Address delegatorAddress, BigInteger share)
+            => Unbond(Repository.GetDelegator(delegatorAddress), share);
 
-        void IDelegatee.DistributeReward(Address delegatorAddress, long height)
-            => DistributeReward(Repository.GetDelegator(delegatorAddress), height);
+        void IDelegatee.DistributeReward(Address delegatorAddress)
+            => DistributeReward(Repository.GetDelegator(delegatorAddress));
 
-        void IDelegatee.Slash(BigInteger slashFactor, long infractionHeight, long height)
-            => Slash(slashFactor, infractionHeight, height);
+        void IDelegatee.Slash(BigInteger slashFactor, long infractionHeight)
+            => Slash(slashFactor, infractionHeight);
 
         public void AddUnbondingRef(UnbondingRef reference)
             => Metadata.AddUnbondingRef(reference);
@@ -400,8 +404,9 @@ namespace Nekoyume.Delegation
             Unjailed?.Invoke(this, e);
         }
 
-        private void StartNewRewardPeriod(long height)
+        private void StartNewRewardPeriod()
         {
+            var height = Repository.ActionContext.BlockIndex;
             LumpSumRewardsRecord? currentRecord = Repository.GetCurrentLumpSumRewardsRecord((TDelegatee)this);
             long? lastStartHeight = null;
             if (currentRecord is LumpSumRewardsRecord lastRecord)

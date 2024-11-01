@@ -160,7 +160,7 @@ namespace Nekoyume.Delegation
                         ? releasingFAV.Value + entriesFAV
                         : entriesFAV;
                     updatedEntries = updatedEntries.Remove(expireHeight);
-                    
+
                 }
                 else
                 {
@@ -186,7 +186,6 @@ namespace Nekoyume.Delegation
         public UnbondLockIn Slash(
             BigInteger slashFactor,
             long infractionHeight,
-            long height,
             out FungibleAssetValue? slashedFAV)
         {
             slashedFAV = null;
@@ -214,9 +213,8 @@ namespace Nekoyume.Delegation
         IUnbonding IUnbonding.Slash(
             BigInteger slashFactor,
             long infractionHeight,
-            long height,
             out FungibleAssetValue? slashedFAV)
-            => Slash(slashFactor, infractionHeight, height, out slashedFAV);
+            => Slash(slashFactor, infractionHeight, out slashedFAV);
 
         public override bool Equals(object? obj)
             => obj is UnbondLockIn other && Equals(other);

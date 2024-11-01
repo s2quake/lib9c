@@ -139,10 +139,9 @@ namespace Nekoyume.Module.Guild
             AgentAddress guildParticipantAddress,
             FungibleAssetValue fav)
         {
-            var height = repository.ActionContext.BlockIndex;
             var guildParticipant = repository.GetGuildParticipant(guildParticipantAddress);
             var guild = repository.GetGuild(guildParticipant.GuildAddress);
-            guildParticipant.Delegate(guild, fav, height);
+            guildParticipant.Delegate(guild, fav);
 
             return repository;
         }
@@ -155,7 +154,7 @@ namespace Nekoyume.Module.Guild
             var guildParticipant = repository.GetGuildParticipant(guildParticipantAddress);
             var guild = repository.GetGuild(guildParticipant.GuildAddress);
             var share = repository.GetBond(guild, guildParticipantAddress).Share;
-            guildParticipant.Undelegate(guild, share, height);
+            guildParticipant.Undelegate(guild, share);
 
             return repository;
         }
@@ -168,7 +167,7 @@ namespace Nekoyume.Module.Guild
             var height = repository.ActionContext.BlockIndex;
             var guildParticipant = repository.GetGuildParticipant(guildParticipantAddress);
             var guild = repository.GetGuild(guildParticipant.GuildAddress);
-            guildParticipant.Undelegate(guild, share, height);
+            guildParticipant.Undelegate(guild, share);
 
             return repository;
         }
@@ -183,7 +182,7 @@ namespace Nekoyume.Module.Guild
             var guild = repository.GetGuild(guildParticipant.GuildAddress);
             var share = repository.GetBond(guild, guildParticipantAddress).Share;
             var dstGuild = repository.GetGuild(dstGuildAddress);
-            guildParticipant.Redelegate(guild, dstGuild, share, height);
+            guildParticipant.Redelegate(guild, dstGuild, share);
 
             return repository;
         }
@@ -191,12 +190,11 @@ namespace Nekoyume.Module.Guild
         private static GuildRepository ClaimReward(
             this GuildRepository repository,
             AgentAddress guildParticipantAddress,
-            GuildAddress guildAddress,
-            long height)
+            GuildAddress guildAddress)
         {
             var guildParticipant = repository.GetGuildParticipant(guildParticipantAddress);
             var guild = repository.GetGuild(guildAddress);
-            guildParticipant.ClaimReward(guild, height);
+            guildParticipant.ClaimReward(guild);
 
             return repository;
         }

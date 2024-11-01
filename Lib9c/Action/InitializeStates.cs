@@ -222,7 +222,7 @@ namespace Nekoyume.Action
                         repository.ActionContext,
                         validatorDelegator.DelegationPoolAddress,
                         delegationFAV));
-                validatorDelegator.Delegate(validatorDelegatee, delegationFAV, context.BlockIndex);
+                validatorDelegator.Delegate(validatorDelegatee, delegationFAV);
 
                 states = repository.World;
             }

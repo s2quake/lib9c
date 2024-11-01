@@ -21,27 +21,22 @@ namespace Nekoyume.Delegation
 
         void Delegate(
             Address delegateeAddress,
-            FungibleAssetValue fav,
-            long height);
+            FungibleAssetValue fav);
 
         void Undelegate(
             Address delegateeAddress,
-            BigInteger share,
-            long height);
+            BigInteger share);
 
         void Redelegate(
             Address srcDelegateeAddress,
             Address dstDelegateeAddress,
-            BigInteger share,
-            long height);
+            BigInteger share);
 
         void CancelUndelegate(
             Address delegateeAddress,
-            FungibleAssetValue fav,
-            long height);
+            FungibleAssetValue fav);
 
         void ClaimReward(
-            Address delegateeAddress,
-            long height);
+            Address delegateeAddress);
     }
 }

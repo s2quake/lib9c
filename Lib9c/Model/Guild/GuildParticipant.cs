@@ -66,7 +66,7 @@ namespace Nekoyume.Model.Guild
 
         IValue IBencodable.Bencoded => Bencoded;
 
-        public override void Delegate(Guild delegatee, FungibleAssetValue fav, long height)
+        public override void Delegate(Guild delegatee, FungibleAssetValue fav)
         {
             if (fav.Sign <= 0)
             {
@@ -74,22 +74,24 @@ namespace Nekoyume.Model.Guild
                     nameof(fav), fav, "Fungible asset value must be positive.");
             }
 
-            delegatee.Bond(this, fav, height);
+            var height = Repository.ActionContext.BlockIndex;
+
+            delegatee.Bond(this, fav);
 
             var guildValidatorRepository = new GuildValidatorRepository(Repository.World, Repository.ActionContext);
             var guildValidatorDelegatee = guildValidatorRepository.GetGuildValidatorDelegatee(delegatee.ValidatorAddress);
             var guildValidatorDelegator = guildValidatorRepository.GetGuildValidatorDelegator(delegatee.Address);
-            guildValidatorDelegatee.Bond(guildValidatorDelegator, fav, height);
+            guildValidatorDelegatee.Bond(guildValidatorDelegator, fav);
             Repository.UpdateWorld(guildValidatorRepository.World);
 
             var validatorRepository = new ValidatorRepository(Repository.World, Repository.ActionContext);
             var validatorDelegatee = validatorRepository.GetValidatorDelegatee(delegatee.ValidatorAddress);
             var validatorDelegator = validatorRepository.GetValidatorDelegator(Address, delegatee.Address);
-            validatorDelegator.Delegate(validatorDelegatee, fav, height);
+            validatorDelegator.Delegate(validatorDelegatee, fav);
             Repository.UpdateWorld(validatorRepository.World);
         }
 
-        public override void Undelegate(Guild delegatee, BigInteger share, long height)
+        public override void Undelegate(Guild delegatee, BigInteger share)
         {
             if (share.Sign <= 0)
             {
@@ -97,29 +99,30 @@ namespace Nekoyume.Model.Guild
                     nameof(share), share, "Share must be positive.");
             }
 
+            var height = Repository.ActionContext.BlockIndex;
             if (height <= 0)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(height), height, "Height must be positive.");
             }
 
-            FungibleAssetValue fav = delegatee.Unbond(this, share, height);
+            FungibleAssetValue fav = delegatee.Unbond(this, share);
 
             var guildValidatorRepository = new GuildValidatorRepository(Repository.World, Repository.ActionContext);
             var guildValidatorDelegatee = guildValidatorRepository.GetGuildValidatorDelegatee(delegatee.ValidatorAddress);
             var guildValidatorDelegator = guildValidatorRepository.GetGuildValidatorDelegator(delegatee.Address);
-            guildValidatorDelegatee.Unbond(guildValidatorDelegator, guildValidatorDelegatee.ShareFromFAV(fav), height);
+            guildValidatorDelegatee.Unbond(guildValidatorDelegator, guildValidatorDelegatee.ShareFromFAV(fav));
             Repository.UpdateWorld(guildValidatorRepository.World);
 
             var validatorRepository = new ValidatorRepository(Repository.World, Repository.ActionContext);
             var validatorDelegatee = validatorRepository.GetValidatorDelegatee(delegatee.ValidatorAddress);
             var validatorDelegator = validatorRepository.GetValidatorDelegator(Address, delegatee.Address);
-            validatorDelegator.Undelegate(validatorDelegatee, validatorDelegatee.ShareFromFAV(fav), height);
+            validatorDelegator.Undelegate(validatorDelegatee, validatorDelegatee.ShareFromFAV(fav));
             Repository.UpdateWorld(validatorRepository.World);
         }
 
         public override void Redelegate(
-            Guild srcDelegatee, Guild dstDelegatee, BigInteger share, long height)
+            Guild srcDelegatee, Guild dstDelegatee, BigInteger share)
         {
             if (share.Sign <= 0)
             {
@@ -127,14 +130,15 @@ namespace Nekoyume.Model.Guild
                     nameof(share), share, "Share must be positive.");
             }
 
+            var height = Repository.ActionContext.BlockIndex;
             if (height <= 0)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(height), height, "Height must be positive.");
             }
 
-            FungibleAssetValue fav = srcDelegatee.Unbond(this, share, height);
-            dstDelegatee.Bond(this, fav, height);
+            FungibleAssetValue fav = srcDelegatee.Unbond(this, share);
+            dstDelegatee.Bond(this, fav);
 
             var guildValidatorRepository = new GuildValidatorRepository(
                 Repository.World, Repository.ActionContext);
@@ -142,8 +146,8 @@ namespace Nekoyume.Model.Guild
             var srcGuildValidatorDelegator = guildValidatorRepository.GetGuildValidatorDelegator(srcDelegatee.Address);
             var dstGuildValidatorDelegatee = guildValidatorRepository.GetGuildValidatorDelegatee(dstDelegatee.ValidatorAddress);
             var dstGuildValidatorDelegator = guildValidatorRepository.GetGuildValidatorDelegator(dstDelegatee.Address);
-            srcGuildValidatorDelegatee.Unbond(srcGuildValidatorDelegator, share, height);
-            dstGuildValidatorDelegatee.Bond(dstGuildValidatorDelegator, fav, height);
+            srcGuildValidatorDelegatee.Unbond(srcGuildValidatorDelegator, share);
+            dstGuildValidatorDelegatee.Bond(dstGuildValidatorDelegator, fav);
             Repository.UpdateWorld(guildValidatorRepository.World);
 
             var validatorRepository = new ValidatorRepository(
@@ -152,8 +156,8 @@ namespace Nekoyume.Model.Guild
             var srcValidatorDelegator = validatorRepository.GetValidatorDelegator(Address, srcDelegatee.Address);
             var dstValidatorDelegatee = validatorRepository.GetValidatorDelegatee(dstDelegatee.ValidatorAddress);
             var dstValidatorDelegator = validatorRepository.GetValidatorDelegator(Address, dstDelegatee.Address);
-            srcValidatorDelegatee.Unbond(srcValidatorDelegator, share, height);
-            dstValidatorDelegatee.Bond(dstValidatorDelegator, fav, height);
+            srcValidatorDelegatee.Unbond(srcValidatorDelegator, share);
+            dstValidatorDelegatee.Bond(dstValidatorDelegator, fav);
             Repository.UpdateWorld(validatorRepository.World);
         }
 

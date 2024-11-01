@@ -142,7 +142,6 @@ namespace Nekoyume.Delegation
         public RebondGrace Slash(
             BigInteger slashFactor,
             long infractionHeight,
-            long height,
             out FungibleAssetValue? slashedFAV)
         {
             CannotMutateRelationsWithoutRepository();
@@ -176,7 +175,7 @@ namespace Nekoyume.Delegation
             {
                 var delegatee = _repository!.GetDelegatee(address);
                 var delegator = _repository!.GetDelegator(DelegatorAddress);
-                delegatee.Unbond(DelegatorAddress, delegatee.ShareFromFAV(slashedEach), height);
+                delegatee.Unbond(DelegatorAddress, delegatee.ShareFromFAV(slashedEach));
                 slashedFAV = slashedFAV.HasValue ? slashedFAV + slashedEach : slashedEach;
             }
 
@@ -187,9 +186,8 @@ namespace Nekoyume.Delegation
         IUnbonding IUnbonding.Slash(
             BigInteger slashFactor,
             long infractionHeight,
-            long height,
             out FungibleAssetValue? slashedFAV)
-            => Slash(slashFactor, infractionHeight, height, out slashedFAV);
+            => Slash(slashFactor, infractionHeight, out slashedFAV);
 
         public override bool Equals(object? obj)
             => obj is RebondGrace other && Equals(other);

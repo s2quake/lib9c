@@ -104,8 +104,7 @@ namespace Nekoyume.ValidatorDelegation
             FungibleAssetValue rewardToAllocate,
             BigInteger validatorPower,
             BigInteger validatorSetPower,
-            Address RewardSource,
-            long height)
+            Address RewardSource)
         {
             ValidatorRepository repository = Repository;
 
@@ -125,7 +124,7 @@ namespace Nekoyume.ValidatorDelegation
                 repository.TransferAsset(RewardSource, RewardPoolAddress, delegationRewards);
             }
 
-            CollectRewards(height);
+            CollectRewards();
         }
 
         public void SetCommissionPercentage(BigInteger percentage, long height)
@@ -154,7 +153,7 @@ namespace Nekoyume.ValidatorDelegation
             CommissionPercentageLastUpdateHeight = height;
         }
 
-        public new void Unjail(long height)
+        public new void Unjail()
         {
             ValidatorRepository repository = Repository;
             var selfDelegation = FAVFromShare(repository.GetBond(this, Address).Share);
@@ -163,7 +162,7 @@ namespace Nekoyume.ValidatorDelegation
                 throw new InvalidOperationException("The self-delegation is still below the minimum.");
             }
 
-            base.Unjail(height);
+            base.Unjail();
         }
 
         public bool Equals(ValidatorDelegatee? other)

@@ -19,7 +19,6 @@ namespace Nekoyume.Delegation
         IUnbonding Slash(
             BigInteger slashFactor,
             long infractionHeight,
-            long height,
             out FungibleAssetValue? slashedFAV);
     }
 }

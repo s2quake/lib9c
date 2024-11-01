@@ -34,7 +34,7 @@ namespace Nekoyume.Action.ValidatorDelegation
             var world = context.PreviousState;
             var repository = new ValidatorRepository(world, context);
             var delegatee = repository.GetValidatorDelegatee(context.Signer);
-            delegatee.Unjail(context.BlockIndex);
+            delegatee.Unjail();
 
             return repository.World;
         }

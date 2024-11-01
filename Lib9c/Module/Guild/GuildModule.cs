@@ -105,7 +105,7 @@ namespace Nekoyume.Module.Guild
             GuildAddress guildAddress)
         {
             var guild = repository.GetGuild(guildAddress);
-            guild.CollectRewards(repository.ActionContext.BlockIndex);
+            guild.CollectRewards();
             repository.SetGuild(guild);
 
             return repository;
