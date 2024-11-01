@@ -32,7 +32,8 @@ namespace Lib9c.Tests.Delegation
             var repo = _fixture.TestRepository;
             var delegatee = _fixture.TestDelegatee1;
             var delegator = _fixture.TestDelegator1;
-            delegatee.Bond(delegator, delegatee.DelegationCurrency * 10, 10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.Bond(delegator, delegatee.DelegationCurrency * 10);
             var delegateeRecon = repo.GetDelegatee(delegatee.Address);
             Assert.Equal(delegatee.Address, delegateeRecon.Address);
             Assert.Equal(delegator.Address, Assert.Single(delegateeRecon.Delegators));
@@ -65,7 +66,8 @@ namespace Lib9c.Tests.Delegation
             totalShare += share;
             totalBonding += bonding;
 
-            var bondedShare = testDelegatee.Bond(testDelegator1, bonding, 10L);
+            _fixture.SetBlockHeight(10L);
+            var bondedShare = testDelegatee.Bond(testDelegator1, bonding);
             var bondedShare1 = _fixture.TestRepository.GetBond(testDelegatee, testDelegator1.Address).Share;
             Assert.Equal(testDelegator1.Address, Assert.Single(testDelegatee.Delegators));
             Assert.Equal(share, bondedShare);
@@ -73,12 +75,13 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(totalShare, testDelegatee.TotalShares);
             Assert.Equal(totalBonding, testDelegatee.TotalDelegated);
 
+            _fixture.SetBlockHeight(20L);
             bonding = testDelegatee.DelegationCurrency * 20;
             share = testDelegatee.ShareFromFAV(bonding);
             share1 += share;
             totalShare += share;
             totalBonding += bonding;
-            bondedShare = testDelegatee.Bond(testDelegator1, bonding, 20L);
+            bondedShare = testDelegatee.Bond(testDelegator1, bonding);
             bondedShare1 = _fixture.TestRepository.GetBond(testDelegatee, testDelegator1.Address).Share;
             Assert.Equal(testDelegator1.Address, Assert.Single(testDelegatee.Delegators));
             Assert.Equal(share, bondedShare);
@@ -86,12 +89,13 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(totalShare, testDelegatee.TotalShares);
             Assert.Equal(totalBonding, testDelegatee.TotalDelegated);
 
+            _fixture.SetBlockHeight(30L);
             bonding = testDelegatee.DelegationCurrency * 30;
             share = testDelegatee.ShareFromFAV(bonding);
             share2 += share;
             totalShare += share;
             totalBonding += bonding;
-            bondedShare = testDelegatee.Bond(testDelegator2, bonding, 30L);
+            bondedShare = testDelegatee.Bond(testDelegator2, bonding);
             var bondedShare2 = _fixture.TestRepository.GetBond(testDelegatee, testDelegator2.Address).Share;
             Assert.Equal(2, testDelegatee.Delegators.Count);
             Assert.Contains(testDelegator1.Address, testDelegatee.Delegators);
@@ -109,9 +113,10 @@ namespace Lib9c.Tests.Delegation
             var testDelegator = _fixture.TestDelegator1;
             var dummyDelegator = _fixture.DummyDelegator1;
 
+            _fixture.SetBlockHeight(10L);
             Assert.Throws<InvalidCastException>(
                 () => testDelegatee.Bond(
-                    dummyDelegator, testDelegatee.DelegationCurrency * 10, 10L));
+                    dummyDelegator, testDelegatee.DelegationCurrency * 10));
         }
 
         [Fact]
@@ -122,9 +127,10 @@ namespace Lib9c.Tests.Delegation
             var dummyDelegator = _fixture.DummyDelegator1;
             var invalidCurrency = Currency.Uncapped("invalid", 3, null);
 
+            _fixture.SetBlockHeight(10L);
             Assert.Throws<InvalidOperationException>(
                 () => testDelegatee.Bond(
-                    testDelegator, invalidCurrency * 10, 10L));
+                    testDelegator, invalidCurrency * 10));
         }
 
         [Fact]
@@ -139,26 +145,29 @@ namespace Lib9c.Tests.Delegation
             var totalShares = BigInteger.Zero;
             var totalDelegated = testDelegatee.DelegationCurrency * 0;
 
+            _fixture.SetBlockHeight(1L);
             var bonding = testDelegatee.DelegationCurrency * 100;
             var share = testDelegatee.ShareFromFAV(bonding);
             share1 += share;
             totalShares += share;
             totalDelegated += bonding;
-            testDelegatee.Bond(testDelegator1, bonding, 1L);
+            testDelegatee.Bond(testDelegator1, bonding);
 
+            _fixture.SetBlockHeight(2L);
             bonding = testDelegatee.DelegationCurrency * 50;
             share = testDelegatee.ShareFromFAV(bonding);
             share2 += share;
             totalShares += share;
             totalDelegated += bonding;
-            testDelegatee.Bond(testDelegator2, bonding, 2L);
+            testDelegatee.Bond(testDelegator2, bonding);
 
+            _fixture.SetBlockHeight(3L);
             var unbonding = share1 / 2;
             share1 -= unbonding;
             totalShares -= unbonding;
             var unbondingFAV = testDelegatee.FAVFromShare(unbonding);
             totalDelegated -= unbondingFAV;
-            var unbondedFAV = testDelegatee.Unbond(testDelegator1, unbonding, 3L);
+            var unbondedFAV = testDelegatee.Unbond(testDelegator1, unbonding);
             var shareAfterUnbond = _fixture.TestRepository.GetBond(testDelegatee, testDelegator1.Address).Share;
             Assert.Equal(2, testDelegatee.Delegators.Count);
             Assert.Contains(testDelegator1.Address, testDelegatee.Delegators);
@@ -168,12 +177,13 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(totalShares, testDelegatee.TotalShares);
             Assert.Equal(totalDelegated, testDelegatee.TotalDelegated);
 
+            _fixture.SetBlockHeight(4L);
             unbonding = share2 / 2;
             share2 -= unbonding;
             totalShares -= unbonding;
             unbondingFAV = testDelegatee.FAVFromShare(unbonding);
             totalDelegated -= unbondingFAV;
-            unbondedFAV = testDelegatee.Unbond(testDelegator2, unbonding, 4L);
+            unbondedFAV = testDelegatee.Unbond(testDelegator2, unbonding);
             shareAfterUnbond = _fixture.TestRepository.GetBond(testDelegatee, testDelegator2.Address).Share;
             Assert.Equal(2, testDelegatee.Delegators.Count);
             Assert.Contains(testDelegator1.Address, testDelegatee.Delegators);
@@ -183,10 +193,11 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(totalShares, testDelegatee.TotalShares);
             Assert.Equal(totalDelegated, testDelegatee.TotalDelegated);
 
+            _fixture.SetBlockHeight(5L);
             totalShares -= share1;
             unbondingFAV = testDelegatee.FAVFromShare(share1);
             totalDelegated -= unbondingFAV;
-            unbondedFAV = testDelegatee.Unbond(testDelegator1, share1, 5L);
+            unbondedFAV = testDelegatee.Unbond(testDelegator1, share1);
             shareAfterUnbond = _fixture.TestRepository.GetBond(testDelegatee, testDelegator1.Address).Share;
             Assert.Equal(testDelegator2.Address, Assert.Single(testDelegatee.Delegators));
             Assert.Equal(unbondingFAV, unbondedFAV);
@@ -199,9 +210,10 @@ namespace Lib9c.Tests.Delegation
         public void CannotUnbondInvalidDelegator()
         {
             var delegatee = _fixture.TestDelegatee1;
+            _fixture.SetBlockHeight(10L);
             Assert.Throws<InvalidCastException>(
                 () => delegatee.Unbond(
-                    _fixture.DummyDelegator1, BigInteger.One, 10L));
+                    _fixture.DummyDelegator1, BigInteger.One));
         }
 
         [Fact]
@@ -215,17 +227,21 @@ namespace Lib9c.Tests.Delegation
             var bonding1 = testDelegatee.DelegationCurrency * 3;
             var bonding2 = testDelegatee.DelegationCurrency * 8;
 
-            var bondedShare1 = testDelegatee.Bond(testDelegator1, bonding1, 10L);
-            var bondedShare2 = testDelegatee.Bond(testDelegator2, bonding2, 10L);
+            _fixture.SetBlockHeight(10L);
+            var bondedShare1 = testDelegatee.Bond(testDelegator1, bonding1);
+            var bondedShare2 = testDelegatee.Bond(testDelegator2, bonding2);
 
+            _fixture.SetBlockHeight(11L);
             repo.MintAsset(testDelegatee.RewardPoolAddress, testDelegatee.RewardCurrency * 10);
-            testDelegatee.CollectRewards(11L);
+            testDelegatee.CollectRewards();
 
-            testDelegatee.DistributeReward(testDelegator1, 11L);
+            _fixture.SetBlockHeight(11L);
+            testDelegatee.DistributeReward(testDelegator1);
             var remainder = repo.GetBalance(DelegationFixture.FixedPoolAddress, testDelegatee.RewardCurrency);
             Assert.Equal(testDelegatee.RewardCurrency * 0, remainder);
 
-            testDelegatee.DistributeReward(testDelegator2, 11L);
+            _fixture.SetBlockHeight(11L);
+            testDelegatee.DistributeReward(testDelegator2);
             remainder = repo.GetBalance(DelegationFixture.FixedPoolAddress, testDelegatee.RewardCurrency);
             Assert.Equal(new FungibleAssetValue(testDelegatee.RewardCurrency, 0, 1), remainder);
         }

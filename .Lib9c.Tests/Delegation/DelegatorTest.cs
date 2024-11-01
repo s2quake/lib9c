@@ -29,8 +29,9 @@ namespace Lib9c.Tests.Delegation
             var repo = _fixture.TestRepository;
             var delegator = _fixture.TestDelegator1;
             var delegatee = _fixture.TestDelegatee1;
+            _fixture.SetBlockHeight(10L);
             repo.MintAsset(delegator.Address, delegatee.DelegationCurrency * 100);
-            delegator.Delegate(delegatee, delegatee.DelegationCurrency * 10, 10L);
+            delegator.Delegate(delegatee, delegatee.DelegationCurrency * 10);
             var delegatorRecon = repo.GetDelegator(delegator.Address);
             Assert.Equal(delegator.Address, delegatorRecon.Address);
             Assert.Equal(delegatee.Address, Assert.Single(delegatorRecon.Delegatees));
@@ -48,7 +49,8 @@ namespace Lib9c.Tests.Delegation
 
             var delegateFAV = delegatee1.DelegationCurrency * 10;
             var delegateShare = delegatee1.ShareFromFAV(delegateFAV);
-            delegator.Delegate(delegatee1, delegateFAV, 1L);
+            _fixture.SetBlockHeight(10L);
+            delegator.Delegate(delegatee1, delegateFAV);
             var delegatorBalance = repo.World.GetBalance(delegator.Address, delegatee1.DelegationCurrency);
             var delegateeBalance = repo.World.GetBalance(delegatee1.DelegationPoolAddress, delegatee1.DelegationCurrency);
             var share = repo.GetBond(delegatee1, delegator.Address).Share;
@@ -62,7 +64,8 @@ namespace Lib9c.Tests.Delegation
 
             var delegateFAV2 = delegatee1.DelegationCurrency * 20;
             var delegateShare2 = delegatee1.ShareFromFAV(delegateFAV2);
-            delegator.Delegate(delegatee1, delegateFAV2, 2L);
+            _fixture.SetBlockHeight(2L);
+            delegator.Delegate(delegatee1, delegateFAV2);
             delegatorBalance = repo.World.GetBalance(delegator.Address, delegatee1.DelegationCurrency);
             delegateeBalance = repo.World.GetBalance(delegatee1.DelegationPoolAddress, delegatee1.DelegationCurrency);
             share = repo.GetBond(delegatee1, delegator.Address).Share;
@@ -74,7 +77,8 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(delegator.Address, Assert.Single(delegatee1.Delegators));
             Assert.Equal(delegatee1.Address, Assert.Single(delegator.Delegatees));
 
-            delegator.Delegate(delegatee2, delegateFAV, 3L);
+            _fixture.SetBlockHeight(3L);
+            delegator.Delegate(delegatee2, delegateFAV);
             delegatorBalance = repo.World.GetBalance(delegator.Address, delegatee2.DelegationCurrency);
             delegateeBalance = repo.World.GetBalance(delegatee2.DelegationPoolAddress, delegatee2.DelegationCurrency);
             share = repo.GetBond(delegatee2, delegator.Address).Share;
@@ -97,11 +101,14 @@ namespace Lib9c.Tests.Delegation
             var delegatorInitialBalance = delegatee.DelegationCurrency * 100;
             repo.MintAsset(delegator.Address, delegatorInitialBalance);
             var delegatingFAV = delegatee.DelegationCurrency * 10;
-            delegator.Delegate(delegatee, delegatingFAV, 9L);
+            _fixture.SetBlockHeight(9L);
+            delegator.Delegate(delegatee, delegatingFAV);
             var initialShare = repo.GetBond(delegatee, delegator.Address).Share;
             var undelegatingShare = initialShare / 3;
             var undelegatingFAV = delegatee.FAVFromShare(undelegatingShare);
-            delegator.Undelegate(delegatee, undelegatingShare, 10L);
+
+            _fixture.SetBlockHeight(10L);
+            delegator.Undelegate(delegatee, undelegatingShare);
             var delegatorBalance = repo.World.GetBalance(delegator.Address, delegatee.DelegationCurrency);
             var delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share1 = repo.GetBond(delegatee, delegator.Address).Share;
@@ -123,9 +130,10 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(10L, entry.CreationHeight);
             Assert.Equal(10L + delegatee.UnbondingPeriod, entry.ExpireHeight);
 
+            _fixture.SetBlockHeight(12L);
             undelegatingShare = repo.GetBond(delegatee, delegator.Address).Share;
             var undelegatingFAV2 = delegatee.FAVFromShare(undelegatingShare);
-            delegator.Undelegate(delegatee, undelegatingShare, 12L);
+            delegator.Undelegate(delegatee, undelegatingShare);
             delegatorBalance = repo.World.GetBalance(delegator.Address, delegatee.DelegationCurrency);
             delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share2 = repo.GetBond(delegatee, delegator.Address).Share;
@@ -193,13 +201,17 @@ namespace Lib9c.Tests.Delegation
             var delegatorInitialBalance = delegatee1.DelegationCurrency * 100;
             repo.MintAsset(delegator.Address, delegatorInitialBalance);
             var delegatingFAV = delegatee1.DelegationCurrency * 10;
-            delegator.Delegate(delegatee1, delegatingFAV, 1L);
+
+            _fixture.SetBlockHeight(1L);
+            delegator.Delegate(delegatee1, delegatingFAV);
             Assert.Equal(delegatee1.Address, Assert.Single(delegator.Delegatees));
             var initialShare = repo.GetBond(delegatee1, delegator.Address).Share;
             var redelegatingShare = initialShare / 3;
             var redelegatingFAV = delegatee1.FAVFromShare(redelegatingShare);
             var redelegatedDstShare = delegatee2.ShareFromFAV(redelegatingFAV);
-            delegator.Redelegate(delegatee1, delegatee2, redelegatingShare, 10L);
+
+            _fixture.SetBlockHeight(10L);
+            delegator.Redelegate(delegatee1, delegatee2, redelegatingShare);
             var delegatorBalance = repo.World.GetBalance(delegator.Address, delegatee1.DelegationCurrency);
             var delegatee1Balance = repo.World.GetBalance(delegatee1.DelegationPoolAddress, delegatee1.DelegationCurrency);
             var delegatee2Balance = repo.World.GetBalance(delegatee2.DelegationPoolAddress, delegatee2.DelegationCurrency);
@@ -228,10 +240,11 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(10L, entry.CreationHeight);
             Assert.Equal(10L + delegatee1.UnbondingPeriod, entry.ExpireHeight);
 
+            _fixture.SetBlockHeight(12L);
             var redelegatingShare2 = repo.GetBond(delegatee1, delegator.Address).Share;
             var redelegatingFAV2 = delegatee1.FAVFromShare(redelegatingShare2);
             var redelegatedDstShare2 = delegatee2.ShareFromFAV(redelegatingFAV2);
-            delegator.Redelegate(delegatee1, delegatee2, redelegatingShare2, 12L);
+            delegator.Redelegate(delegatee1, delegatee2, redelegatingShare2);
             delegatorBalance = repo.World.GetBalance(delegator.Address, delegatee1.DelegationCurrency);
             delegatee1Balance = repo.World.GetBalance(delegatee1.DelegationPoolAddress, delegatee1.DelegationCurrency);
             delegatee2Balance = repo.World.GetBalance(delegatee2.DelegationPoolAddress, delegatee2.DelegationCurrency);
@@ -300,17 +313,20 @@ namespace Lib9c.Tests.Delegation
             var reward = delegatee.DelegationCurrency * 100;
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV1 = delegatee.DelegationCurrency * 10;
-            delegator1.Delegate(delegatee, delegatingFAV1, 10L);
+            delegator1.Delegate(delegatee, delegatingFAV1);
             var delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share1 = repo.GetBond(delegatee, delegator1.Address).Share;
             Assert.Equal(delegatorInitialBalance - delegatingFAV1, delegator1Balance);
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV2 = delegatee.DelegationCurrency * 20;
-            delegator2.Delegate(delegatee, delegatingFAV2, 10L);
+            delegator2.Delegate(delegatee, delegatingFAV2);
             var delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share2 = repo.GetBond(delegatee, delegator2.Address).Share;
@@ -320,10 +336,12 @@ namespace Lib9c.Tests.Delegation
 
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
+            _fixture.SetBlockHeight(11L);
             delegatingFAV1 = delegatee.DelegationCurrency * 10;
-            delegator1.Delegate(delegatee, delegatingFAV1, 11L);
+            delegator1.Delegate(delegatee, delegatingFAV1);
             delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 
@@ -332,7 +350,8 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(delegatorInitialBalance - delegatingFAV2, delegator2Balance);
             Assert.Equal(reward * 2 - reward1, collectedRewards);
 
-            delegator2.Delegate(delegatee, delegatingFAV2, 11L);
+            _fixture.SetBlockHeight(11L);
+            delegator2.Delegate(delegatee, delegatingFAV2);
             delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 
@@ -356,17 +375,20 @@ namespace Lib9c.Tests.Delegation
             var reward = delegatee.RewardCurrency * 100;
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV1 = delegatee.DelegationCurrency * 10;
-            delegator1.Delegate(delegatee, delegatingFAV1, 10L);
+            delegator1.Delegate(delegatee, delegatingFAV1);
             var delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share1 = repo.GetBond(delegatee, delegator1.Address).Share;
             Assert.Equal(delegatorInitialBalance - delegatingFAV1, delegator1Balance);
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV2 = delegatee.DelegationCurrency * 20;
-            delegator2.Delegate(delegatee, delegatingFAV2, 10L);
+            delegator2.Delegate(delegatee, delegatingFAV2);
             var delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share2 = repo.GetBond(delegatee, delegator2.Address).Share;
@@ -376,10 +398,12 @@ namespace Lib9c.Tests.Delegation
 
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
+            _fixture.SetBlockHeight(11L);
             var shareToUndelegate = repo.GetBond(delegatee, delegator1.Address).Share / 3;
-            delegator1.Undelegate(delegatee, shareToUndelegate, 11L);
+            delegator1.Undelegate(delegatee, shareToUndelegate);
             delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 
@@ -388,8 +412,9 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(delegatorInitialBalance - delegatingFAV2, delegator2Balance);
             Assert.Equal(reward * 2 - reward1, collectedRewards);
 
+            _fixture.SetBlockHeight(11L);
             shareToUndelegate = repo.GetBond(delegatee, delegator2.Address).Share / 2;
-            delegator2.Undelegate(delegatee, shareToUndelegate, 11L);
+            delegator2.Undelegate(delegatee, shareToUndelegate);
             delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 
@@ -414,17 +439,20 @@ namespace Lib9c.Tests.Delegation
             var reward = delegatee.RewardCurrency * 100;
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV1 = delegatee.DelegationCurrency * 10;
-            delegator1.Delegate(delegatee, delegatingFAV1, 10L);
+            delegator1.Delegate(delegatee, delegatingFAV1);
             var delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share1 = repo.GetBond(delegatee, delegator1.Address).Share;
             Assert.Equal(delegatorInitialBalance - delegatingFAV1, delegator1Balance);
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV2 = delegatee.DelegationCurrency * 20;
-            delegator2.Delegate(delegatee, delegatingFAV2, 10L);
+            delegator2.Delegate(delegatee, delegatingFAV2);
             var delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share2 = repo.GetBond(delegatee, delegator2.Address).Share;
@@ -434,10 +462,12 @@ namespace Lib9c.Tests.Delegation
 
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
+            _fixture.SetBlockHeight(11L);
             var shareToRedelegate = repo.GetBond(delegatee, delegator1.Address).Share / 3;
-            delegator1.Redelegate(delegatee, dstDelegatee, shareToRedelegate, 11L);
+            delegator1.Redelegate(delegatee, dstDelegatee, shareToRedelegate);
             delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 
@@ -446,8 +476,9 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(delegatorInitialBalance - delegatingFAV2, delegator2Balance);
             Assert.Equal(reward * 2 - reward1, collectedRewards);
 
+            _fixture.SetBlockHeight(11L);
             shareToRedelegate = repo.GetBond(delegatee, delegator2.Address).Share / 2;
-            delegator2.Redelegate(delegatee, dstDelegatee, shareToRedelegate, 11L);
+            delegator2.Redelegate(delegatee, dstDelegatee, shareToRedelegate);
             delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 
@@ -472,17 +503,20 @@ namespace Lib9c.Tests.Delegation
             var reward = delegatee.DelegationCurrency * 100;
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV1 = delegatee.DelegationCurrency * 10;
-            delegator1.Delegate(delegatee, delegatingFAV1, 10L);
+            delegator1.Delegate(delegatee, delegatingFAV1);
             var delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share1 = repo.GetBond(delegatee, delegator1.Address).Share;
             Assert.Equal(delegatorInitialBalance - delegatingFAV1, delegator1Balance);
 
+            _fixture.SetBlockHeight(10L);
             var delegatingFAV2 = delegatee.DelegationCurrency * 20;
-            delegator2.Delegate(delegatee, delegatingFAV2, 10L);
+            delegator2.Delegate(delegatee, delegatingFAV2);
             var delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             delegateeBalance = repo.World.GetBalance(delegatee.DelegationPoolAddress, delegatee.DelegationCurrency);
             var share2 = repo.GetBond(delegatee, delegator2.Address).Share;
@@ -492,10 +526,12 @@ namespace Lib9c.Tests.Delegation
 
             repo.MintAsset(delegatee.RewardPoolAddress, reward);
             // EndBlock after delegatee's reward
-            delegatee.CollectRewards(10L);
+            _fixture.SetBlockHeight(10L);
+            delegatee.CollectRewards();
 
             var shareToRedelegate = repo.GetBond(delegatee, delegator1.Address).Share / 3;
-            delegator1.ClaimReward(delegatee, 11L);
+            _fixture.SetBlockHeight(11L);
+            delegator1.ClaimReward(delegatee);
             delegator1Balance = repo.World.GetBalance(delegator1.Address, delegatee.DelegationCurrency);
             var collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 
@@ -505,7 +541,8 @@ namespace Lib9c.Tests.Delegation
             Assert.Equal(reward * 2 - reward1, collectedRewards);
 
             shareToRedelegate = repo.GetBond(delegatee, delegator2.Address).Share / 2;
-            delegator2.ClaimReward(delegatee, 11L);
+            _fixture.SetBlockHeight(11L);
+            delegator2.ClaimReward(delegatee);
             delegator2Balance = repo.World.GetBalance(delegator2.Address, delegatee.DelegationCurrency);
             collectedRewards = DelegationFixture.TotalRewardsOfRecords(delegatee, repo);
 

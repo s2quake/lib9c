@@ -23,10 +23,7 @@ namespace Lib9c.Tests.Delegation
                         stateStore.GetStateRoot(null).SetMetadata(
                             new TrieMetadata(BlockMetadata.CurrentProtocolVersion))),
                     stateStore));
-            var context = new ActionContext()
-            {
-                BlockProtocolVersion = BlockMetadata.CurrentProtocolVersion,
-            };
+            var context = Context;
 
             TestRepository = new TestRepository(world, context);
             TestDelegator1 = new TestDelegator(
@@ -44,6 +41,11 @@ namespace Lib9c.Tests.Delegation
             DummyDelegator1 = new DummyDelegator(
                 new Address("0x0054E98312C47E7Fa0ABed45C23Fa187e31C373a"), DummyRepository.DelegateeAccountAddress, DummyRepository);
         }
+
+        public ActionContext Context { get; } = new ActionContext
+        {
+            BlockProtocolVersion = BlockMetadata.CurrentProtocolVersion,
+        };
 
         public TestRepository TestRepository { get; }
 
@@ -78,6 +80,11 @@ namespace Lib9c.Tests.Delegation
             }
 
             return reward;
+        }
+
+        public void SetBlockHeight(long height)
+        {
+            Context.BlockIndex = height;
         }
     }
 }

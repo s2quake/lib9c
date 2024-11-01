@@ -50,7 +50,7 @@ namespace Lib9c.Tests.Action.Guild
             var guild = repository.GetGuild(guildAddress);
             var reward = NCG * 1000;
             repository.UpdateWorld(EnsureToMintAsset(repository.World, guild.RewardPoolAddress, reward));
-            guild.CollectRewards(1);
+            guild.CollectRewards();
             world = repository.World;
 
             for (var i = 0; i < nParticipants; i++)
@@ -107,7 +107,7 @@ namespace Lib9c.Tests.Action.Guild
             var guild = repository.GetGuild(guildAddress);
             var reward = NCG * 1000;
             repository.UpdateWorld(EnsureToMintAsset(repository.World, guild.RewardPoolAddress, reward));
-            guild.CollectRewards(1);
+            guild.CollectRewards();
             world = repository.World;
 
             var claimRewardGuild = new ClaimRewardGuild();
