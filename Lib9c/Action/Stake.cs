@@ -16,6 +16,7 @@ using Nekoyume.Model.Stake;
 using Nekoyume.Model.State;
 using Nekoyume.Module;
 using Nekoyume.Module.Guild;
+using Nekoyume.Module.ValidatorDelegation;
 using Nekoyume.TableData;
 using Nekoyume.TableData.Stake;
 using Nekoyume.TypedAddress;
@@ -142,15 +143,24 @@ namespace Nekoyume.Action
             // NOTE: Cannot anything if staking state is claimable.
             if (stakeStateV2.ClaimableBlockIndex <= context.BlockIndex)
             {
-                throw new StakeExistingClaimableException();
+                var validatorRepository = new ValidatorRepository(states, context);
+                var isValidator = validatorRepository.TryGetValidatorDelegatee(
+                    context.Signer, out var validatorDelegatee);
+                if (!isValidator)
+                {
+                    throw new StakeExistingClaimableException();
+                }
             }
 
             // NOTE: When the staking state is locked up.
             // TODO: Remove this condition after the migration is done.
             if (stakeStateV2.CancellableBlockIndex > context.BlockIndex)
             {
+                var validatorRepository = new ValidatorRepository(states, context);
+                var isValidator = validatorRepository.TryGetValidatorDelegatee(
+                    context.Signer, out var validatorDelegatee);
                 // NOTE: Cannot re-contract with less balance.
-                if (targetStakeBalance < stakedBalance)
+                if (targetStakeBalance < stakedBalance && !isValidator)
                 {
                     throw new RequiredBlockIndexException();
                 }
